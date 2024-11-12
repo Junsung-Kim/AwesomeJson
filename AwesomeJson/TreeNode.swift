@@ -4,43 +4,32 @@ struct TreeNode: View {
     var key: String
     var data: Any
     var fontSize: CGFloat
+    var fullKey: String
     @Binding var expandCollapseState: [String: Bool]
-    
-    @State private var isExpanded: Bool = false
     
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
-                Button(action: toggleExpansion) {
-                    Text(isExpanded ? "▼" : "▶") // Expand/Collapse 아이콘
-                        .font(.system(size: fontSize, design: .monospaced))
-                        .foregroundColor(.blue)
-                        .padding(.trailing, 5)
+                Button(action: {
+                    expandCollapseState[fullKey]?.toggle()
+                }) {
+                    HStack {
+                        Text(expandCollapseState[fullKey] == true ? "▼" : "▶")
+                            .font(.system(size: fontSize, design: .monospaced))
+                            .foregroundColor(.blue)
+                        Text(key)
+                            .font(.system(size: fontSize, design: .monospaced))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
-                Text(key)
-                    .font(.system(size: fontSize, design: .monospaced))
-                    .padding(5)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(5)
+                .buttonStyle(BorderlessButtonStyle())
             }
-            .padding(.vertical, 5)
+            .frame(maxWidth: .infinity)
             
-            if isExpanded {
-                TreeView(data: data, fontSize: fontSize, expandCollapseState: $expandCollapseState)
+            if expandCollapseState[fullKey] == true {
+                TreeView(data: data, fontSize: fontSize, parentKey: fullKey, expandCollapseState: $expandCollapseState)
                     .padding(.leading)
             }
-            
-            Divider()
         }
-        .onAppear {
-            isExpanded = expandCollapseState[key] ?? false
-        }
-        .onChange(of: isExpanded) { newValue in
-            expandCollapseState[key] = newValue
-        }
-    }
-    
-    private func toggleExpansion() {
-        isExpanded.toggle()
     }
 }
